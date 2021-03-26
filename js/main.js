@@ -243,3 +243,48 @@ viewAll.forEach((el, index) => {
 		}
 	})
 })
+
+// Server
+
+const modalForm = document.querySelector('.modal-form');
+
+const postData = dataUser => fetch('server.php',{
+	method: 'POST',
+	body: dataUser,
+})
+
+// Проверяем валидность формы 
+const validInput = () => {
+	const modalInput = document.querySelectorAll('.modal-input');
+	let valid = 0;
+	modalInput.forEach(input => {
+		if(input.value.trim() !== '')
+			valid += 1;
+	})
+	return valid ? true : false;
+}
+
+modalForm.addEventListener('submit', e => {
+	e.preventDefault();
+
+	const formData = new FormData(modalForm); // почитать самому!
+	formData.append('cart', JSON.stringify(cart.cartGoods))
+	const valid = validInput();
+
+	if(cart.cartGoods.length && valid){ //  сама проверка
+		postData(formData)
+		.then(response => {
+			if(!response.ok){
+				throw new Error(response.status)
+			}else{
+				console.log("Успешно!");
+			}
+		})
+		.catch(err => console.error(err))
+		.finally(() => {
+			closeModal();
+			modalForm.reset();
+			cart.deleteAllItems();
+		})
+	}
+})
